@@ -31,7 +31,7 @@ from mcp.client.stdio import stdio_client
 HERE = os.path.dirname(os.path.abspath(__file__))
 SERVER = os.path.join(HERE, "jenkins_status.py")
 
-# Best-effort: load JENKINS_* from project/build-fixer/.env if python-dotenv is
+# Best-effort: load JENKINS_* from project/.env if python-dotenv is
 # available. Real env vars still win over .env.
 try:
     from dotenv import load_dotenv

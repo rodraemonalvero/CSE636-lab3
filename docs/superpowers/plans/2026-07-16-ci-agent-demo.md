@@ -29,9 +29,9 @@
 - `project/ci-agent-demo/REQUIREMENTS.md` — deliverable A; the agent's input spec.
 - `project/ci-agent-demo/README.md` — orientation + the reset command.
 - `project/ci-agent-demo/reports/.gitkeep` — where Claude Code writes `run-NN.md`.
-- `project/build-fixer/mcp_servers/jenkins_status.py` — **extended** (+`_flow_definition_xml`, `_crumb`, `create_job`, `trigger_build`, `get_build_log`).
-- `project/build-fixer/mcp_servers/test_flow_definition_xml.py` — pytest unit test for the pure XML helper.
-- `project/build-fixer/mcp_servers/test_jenkins_status.py` — **extended** with a gated write self-test.
+- `project/mcp_servers/jenkins_status.py` — **extended** (+`_flow_definition_xml`, `_crumb`, `create_job`, `trigger_build`, `get_build_log`).
+- `project/mcp_servers/test_flow_definition_xml.py` — pytest unit test for the pure XML helper.
+- `project/mcp_servers/test_jenkins_status.py` — **extended** with a gated write self-test.
 - `weeks/week-03/week-03-demo.md` — deliverable B; instructor runbook.
 - `CLAUDE.md` — add `project/ci-agent-demo/` to the project inventory.
 
@@ -111,15 +111,15 @@ git commit -m "feat(ci-agent-demo): add pricing app with planted bug + tests"
 ## Task 2: Pure `_flow_definition_xml` helper (unit-tested)
 
 **Files:**
-- Modify: `project/build-fixer/mcp_servers/jenkins_status.py`
-- Test: `project/build-fixer/mcp_servers/test_flow_definition_xml.py`
+- Modify: `project/mcp_servers/jenkins_status.py`
+- Test: `project/mcp_servers/test_flow_definition_xml.py`
 
 **Interfaces:**
 - Produces: `_flow_definition_xml(pipeline_script: str) -> str` — returns a Jenkins Pipeline job `config.xml` string embedding `pipeline_script` as an inline CPS (sandboxed) definition. XML-escapes the script.
 
 - [ ] **Step 1: Write the failing test**
 
-Create `project/build-fixer/mcp_servers/test_flow_definition_xml.py`:
+Create `project/mcp_servers/test_flow_definition_xml.py`:
 
 ```python
 from jenkins_status import _flow_definition_xml
@@ -144,12 +144,12 @@ def test_escapes_xml_special_chars():
 
 - [ ] **Step 2: Run the test to verify it fails**
 
-Run: `cd project/build-fixer/mcp_servers && python3 -m pytest test_flow_definition_xml.py -q`
+Run: `.venv/bin/python -m pytest project/mcp_servers/test_flow_definition_xml.py -q`
 Expected: FAIL — `ImportError: cannot import name '_flow_definition_xml'`.
 
 - [ ] **Step 3: Implement the helper**
 
-In `project/build-fixer/mcp_servers/jenkins_status.py`, add `import html` near the top imports, and add this function just after the `_auth()` helper:
+In `project/mcp_servers/jenkins_status.py`, add `import html` near the top imports, and add this function just after the `_auth()` helper:
 
 ```python
 def _flow_definition_xml(pipeline_script):
@@ -170,13 +170,13 @@ def _flow_definition_xml(pipeline_script):
 
 - [ ] **Step 4: Run the test to verify it passes**
 
-Run: `cd project/build-fixer/mcp_servers && python3 -m pytest test_flow_definition_xml.py -q`
-Expected: PASS (2 passed). (Uses the `.venv` if `mcp` import is needed; the helper itself needs no network. If import of `jenkins_status` pulls `mcp`, run with the venv: `../../build-fixer/.venv/bin/python -m pytest ...` — simplest is `cd project/build-fixer && .venv/bin/python -m pytest mcp_servers/test_flow_definition_xml.py -q`.)
+Run: `.venv/bin/python -m pytest project/mcp_servers/test_flow_definition_xml.py -q`
+Expected: PASS (2 passed). The consolidated root `.venv` already has `mcp` (importing `jenkins_status` pulls it in); the helper itself needs no network.
 
 - [ ] **Step 5: Commit**
 
 ```bash
-git add project/build-fixer/mcp_servers/jenkins_status.py project/build-fixer/mcp_servers/test_flow_definition_xml.py
+git add project/mcp_servers/jenkins_status.py project/mcp_servers/test_flow_definition_xml.py
 git commit -m "feat(mcp): add pure _flow_definition_xml pipeline-config helper"
 ```
 
@@ -185,8 +185,8 @@ git commit -m "feat(mcp): add pure _flow_definition_xml pipeline-config helper"
 ## Task 3: `_crumb` helper + `create_job` MCP tool
 
 **Files:**
-- Modify: `project/build-fixer/mcp_servers/jenkins_status.py`
-- Modify: `project/build-fixer/mcp_servers/test_jenkins_status.py`
+- Modify: `project/mcp_servers/jenkins_status.py`
+- Modify: `project/mcp_servers/test_jenkins_status.py`
 
 **Interfaces:**
 - Consumes: `_flow_definition_xml` (Task 2), `_auth()`, `JENKINS_URL`.
@@ -274,7 +274,7 @@ In `jenkins_status.py`, add at the top of `call_tool` (before the `list_jobs` br
 
 - [ ] **Step 4: Add a gated write self-test to the test client**
 
-In `project/build-fixer/mcp_servers/test_jenkins_status.py`, after the existing `get_build_status` call inside `main()`, add:
+In `project/mcp_servers/test_jenkins_status.py`, after the existing `get_build_status` call inside `main()`, add:
 
 ```python
             if os.environ.get("MCP_WRITE_TEST") == "1":
@@ -291,18 +291,17 @@ In `project/build-fixer/mcp_servers/test_jenkins_status.py`, after the existing 
 
 - [ ] **Step 5: Verify against live Jenkins**
 
-Precondition: `cstu-jenkins` running and `JENKINS_*` in `project/build-fixer/.env`.
-Run:
+Precondition: `cstu-jenkins` running and `JENKINS_*` in `project/.env`.
+Run (from the repo root, using the consolidated root `.venv`):
 ```bash
-cd project/build-fixer
-MCP_WRITE_TEST=1 .venv/bin/python mcp_servers/test_jenkins_status.py
+MCP_WRITE_TEST=1 .venv/bin/python project/mcp_servers/test_jenkins_status.py
 ```
 Expected: prints `Tools advertised: ... create_job ...`, then `Job 'mcp-selftest' created.` Confirm in the Jenkins UI (http://localhost:8080) that a `mcp-selftest` pipeline job now exists. Re-running prints `Job 'mcp-selftest' updated.`
 
 - [ ] **Step 6: Commit**
 
 ```bash
-git add project/build-fixer/mcp_servers/jenkins_status.py project/build-fixer/mcp_servers/test_jenkins_status.py
+git add project/mcp_servers/jenkins_status.py project/mcp_servers/test_jenkins_status.py
 git commit -m "feat(mcp): add _crumb helper and create_job tool"
 ```
 
@@ -311,8 +310,8 @@ git commit -m "feat(mcp): add _crumb helper and create_job tool"
 ## Task 4: `trigger_build` + `get_build_log` MCP tools
 
 **Files:**
-- Modify: `project/build-fixer/mcp_servers/jenkins_status.py`
-- Modify: `project/build-fixer/mcp_servers/test_jenkins_status.py`
+- Modify: `project/mcp_servers/jenkins_status.py`
+- Modify: `project/mcp_servers/test_jenkins_status.py`
 
 **Interfaces:**
 - Consumes: `_crumb()`, `_auth()`, `JENKINS_URL`; existing `get_build_status`.
@@ -412,10 +411,9 @@ In `test_jenkins_status.py`, add `import asyncio` if not already imported (it is
 
 - [ ] **Step 4: Verify against live Jenkins**
 
-Run:
+Run (from the repo root):
 ```bash
-cd project/build-fixer
-MCP_WRITE_TEST=1 .venv/bin/python mcp_servers/test_jenkins_status.py
+MCP_WRITE_TEST=1 .venv/bin/python project/mcp_servers/test_jenkins_status.py
 ```
 Expected: `Build triggered for 'mcp-selftest'.`, then `status:` showing `build #1 — SUCCESS` (may take a few seconds), then `contains 'hello-from-mcp': True`.
 
@@ -423,7 +421,7 @@ Expected: `Build triggered for 'mcp-selftest'.`, then `status:` showing `build #
 
 Optionally delete the scratch job in the Jenkins UI (`mcp-selftest` → Delete Pipeline). Then:
 ```bash
-git add project/build-fixer/mcp_servers/jenkins_status.py project/build-fixer/mcp_servers/test_jenkins_status.py
+git add project/mcp_servers/jenkins_status.py project/mcp_servers/test_jenkins_status.py
 git commit -m "feat(mcp): add trigger_build and get_build_log tools"
 ```
 
@@ -520,7 +518,7 @@ Build #2: <result> — <n passed>
 - [ ] **Step 2: Verify the referenced tool names and paths are correct**
 
 Run: `grep -n "create_job\|trigger_build\|get_build_log\|get_build_status\|list_jobs" project/ci-agent-demo/REQUIREMENTS.md`
-Expected: every tool named here exists in `jenkins_status.py` (cross-check with `grep '"name":' project/build-fixer/mcp_servers/jenkins_status.py`). Confirm the app path `project/ci-agent-demo/app` matches Task 1.
+Expected: every tool named here exists in `jenkins_status.py` (cross-check with `grep '"name":' project/mcp_servers/jenkins_status.py`). Confirm the app path `project/ci-agent-demo/app` matches Task 1.
 
 - [ ] **Step 3: Commit**
 
@@ -574,7 +572,7 @@ one change that matters.
 
 See the instructor runbook: [`weeks/week-03/week-03-demo.md`](../../weeks/week-03/week-03-demo.md).
 The Jenkins MCP server it uses is
-[`../build-fixer/mcp_servers/jenkins_status.py`](../build-fixer/mcp_servers/jenkins_status.py).
+[`../mcp_servers/jenkins_status.py`](../mcp_servers/jenkins_status.py).
 
 ## Reset (re-arm the demo)
 
@@ -644,7 +642,7 @@ Create `weeks/week-03/week-03-demo.md`:
 > | **Prerequisites** | Week 2 Jenkins (`cstu-jenkins`) + the Jenkins MCP server registered in Claude Code |
 > | **Time budget** | ~10 min live |
 > | **What the class sees** | An agent create a pipeline, hit a red build, diagnose it, ask permission, fix it, and prove it green |
-> | **Ties into** | [`project/ci-agent-demo/`](../../project/ci-agent-demo/) and [`jenkins_status.py`](../../project/build-fixer/mcp_servers/jenkins_status.py) |
+> | **Ties into** | [`project/ci-agent-demo/`](../../project/ci-agent-demo/) and [`jenkins_status.py`](../../project/mcp_servers/jenkins_status.py) |
 
 ---
 
@@ -671,7 +669,7 @@ you keep control at the one decision that matters.
 (Week 2). `docker ps` should list it.
 
 **A2. Jenkins API token.** Manage Jenkins → Users → *your user* → Security →
-API Token → Add new token. Put credentials in `project/build-fixer/.env`
+API Token → Add new token. Put credentials in `project/.env`
 (gitignored):
 
 ```
@@ -680,14 +678,16 @@ JENKINS_USER=<user>
 JENKINS_TOKEN=<token>
 ```
 
-**A3. Register the MCP server** in `~/.claude/claude.json` (absolute path):
+**A3. Register the MCP server** in `~/.claude.json` (absolute paths). Point
+`command` at the **consolidated root `.venv`** Python so `mcp` resolves (a bare
+`python` dies with `ModuleNotFoundError: No module named 'mcp'`):
 
 ```json
 {
   "mcpServers": {
     "cse636-jenkins": {
-      "command": "python",
-      "args": ["/absolute/path/to/project/build-fixer/mcp_servers/jenkins_status.py"],
+      "command": "/absolute/path/to/CSE636/.venv/bin/python",
+      "args": ["/absolute/path/to/CSE636/project/mcp_servers/jenkins_status.py"],
       "env": {
         "JENKINS_URL": "http://localhost:8080",
         "JENKINS_USER": "<user>",
@@ -701,8 +701,7 @@ JENKINS_TOKEN=<token>
 **A4. Smoke-test the MCP write tools** (creates + builds a throwaway job):
 
 ```bash
-cd project/build-fixer
-MCP_WRITE_TEST=1 .venv/bin/python mcp_servers/test_jenkins_status.py
+MCP_WRITE_TEST=1 .venv/bin/python project/mcp_servers/test_jenkins_status.py
 ```
 
 Expect `Job 'mcp-selftest' created.`, a `SUCCESS` status, and
@@ -787,7 +786,7 @@ Jenkins is up (A1).
 - [ ] **Step 2: Verify links and conventions**
 
 Run: `grep -n "](.*)" weeks/week-03/week-03-demo.md`
-Expected: relative links resolve — `images/learning-path.svg` exists (`ls weeks/week-03/images/learning-path.svg`), `../../project/ci-agent-demo/REQUIREMENTS.md` and `../../project/build-fixer/mcp_servers/jenkins_status.py` exist. Confirm the file opens with the learning-path strip and 🎯 at-a-glance and closes with a recap (per weeks conventions).
+Expected: relative links resolve — `images/learning-path.svg` exists (`ls weeks/week-03/images/learning-path.svg`), `../../project/ci-agent-demo/REQUIREMENTS.md` and `../../project/mcp_servers/jenkins_status.py` exist. Confirm the file opens with the learning-path strip and 🎯 at-a-glance and closes with a recap (per weeks conventions).
 
 - [ ] **Step 3: Commit**
 
@@ -808,7 +807,7 @@ git commit -m "docs(week-03): add CI/CD agent-in-the-loop instructor runbook"
 In `CLAUDE.md`, in the "Executable code lives under `project/`" list, add a bullet after the `project/build-fixer/` entry:
 
 ```markdown
-- `project/ci-agent-demo/` — Week 3 (class demo): Claude Code as the CI/CD **agent in the loop**. Given `REQUIREMENTS.md`, Claude Code drives local Jenkins **only through MCP tools** (`create_job`/`trigger_build`/`get_build_log` added to `build-fixer/mcp_servers/jenkins_status.py`) to create a pipeline, produce a red build (a planted bug in `app/pricing.py`), diagnose it, apply a **human-approved** minimal fix, push to `main`, verify green, and write `reports/run-NN.md`. Mount-free; checks out the class repo over GitHub. Runbook: `weeks/week-03/week-03-demo.md`.
+- `project/ci-agent-demo/` — Week 3 (class demo): Claude Code as the CI/CD **agent in the loop**. Given `REQUIREMENTS.md`, Claude Code drives local Jenkins **only through MCP tools** (`create_job`/`trigger_build`/`get_build_log` added to `mcp_servers/jenkins_status.py`) to create a pipeline, produce a red build (a planted bug in `app/pricing.py`), diagnose it, apply a **human-approved** minimal fix, push to `main`, verify green, and write `reports/run-NN.md`. Mount-free; checks out the class repo over GitHub. Runbook: `weeks/week-03/week-03-demo.md`.
 ```
 
 - [ ] **Step 2: Verify**

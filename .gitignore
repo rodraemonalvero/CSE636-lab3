@@ -15,6 +15,9 @@ venv-*/
 # Local environment / secrets
 .env
 
+# Machine-specific MCP server registration (absolute paths); regenerate via `claude mcp add`
+.mcp.json
+
 # OS / editor cruft
 .DS_Store
 
@@ -24,6 +27,7 @@ project/Jenkins/anaconda_projects/
 
 # Lab/run outputs (regenerable)
 project/forecasting/cpu_metrics.csv
+weeks/week-04/cpu_metrics.csv
 project/anomaly/metrics_sample.csv
 project/iac/tfplan.binary
 project/iac/.terraform/
