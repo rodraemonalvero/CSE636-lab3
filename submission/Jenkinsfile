@@ -3,7 +3,11 @@ pipeline {
 
     environment {
         ANTHROPIC_API_KEY = credentials('ANTHROPIC_API_KEY')
+        GH_TOKEN = credentials('github-token')
+
         MODEL = 'claude-haiku-4-5'
+        REPO = 'rodraemonalvero/CSE636-lab3'
+        BASE_BRANCH = 'agent-optimized-ci'
     }
 
     stages {
@@ -19,32 +23,28 @@ pipeline {
         stage('Select Impacted Tests') {
             steps {
                 dir('submission') {
-
                     script {
-
                         sh '''
-                        python scripts/select_tests.py \
-                          --files src/text_utils.py README.md \
-                          | tee test_selection.log
+                            python scripts/select_tests.py \
+                              --files src/text_utils.py README.md \
+                              | tee test_selection.log
                         '''
 
                         env.SELECTED_TESTS = sh(
                             script: '''
-                            grep "^SELECTED_TESTS=" test_selection.log | cut -d= -f2-
+                                grep "^SELECTED_TESTS=" test_selection.log \
+                                | cut -d= -f2-
                             ''',
                             returnStdout: true
                         ).trim()
 
                         echo "Selected tests: ${env.SELECTED_TESTS}"
-
                     }
-
                 }
             }
         }
 
         stage('Run Selected Tests') {
-
             when {
                 expression {
                     return env.SELECTED_TESTS?.trim()
@@ -52,21 +52,15 @@ pipeline {
             }
 
             steps {
-
                 dir('submission') {
-
                     sh '''
-                    pytest ${SELECTED_TESTS} -v
+                        pytest ${SELECTED_TESTS} -v
                     '''
-
                 }
-
             }
-
         }
 
         stage('Skip Tests') {
-
             when {
                 expression {
                     return !env.SELECTED_TESTS?.trim()
@@ -74,46 +68,32 @@ pipeline {
             }
 
             steps {
-
                 echo 'Documentation-only change. Application tests skipped.'
-
             }
-
         }
 
         stage('Black Formatting Check') {
-
             steps {
-
                 dir('submission') {
-
                     script {
-
                         int rc = sh(
                             script: '''
-                            black --check src > format_log.txt 2>&1
+                                black --check src > format_log.txt 2>&1
                             ''',
                             returnStatus: true
                         )
 
-                        sh '''
-                        cat format_log.txt
-                        '''
+                        sh 'cat format_log.txt'
 
                         env.BLACK_FAILED = (rc != 0).toString()
 
                         echo "Formatting failed: ${env.BLACK_FAILED}"
-
                     }
-
                 }
-
             }
-
         }
 
-        stage('AI Remediation Proposal') {
-
+        stage('AI Remediation: Open PR') {
             when {
                 expression {
                     return env.BLACK_FAILED == 'true'
@@ -121,23 +101,22 @@ pipeline {
             }
 
             steps {
-
                 dir('submission') {
-
                     sh '''
-                    python scripts/remediation_agent.py \
-                      --log format_log.txt \
-                      --source src/text_utils.py
+                        python -m pip install --quiet PyGithub
                     '''
 
+                    sh '''
+                        python scripts/remediation_agent.py \
+                          --log format_log.txt \
+                          --source src/text_utils.py \
+                          --open-pr
+                    '''
                 }
-
             }
-
         }
 
         stage('Human Approval') {
-
             when {
                 expression {
                     return env.BLACK_FAILED == 'true'
@@ -145,34 +124,30 @@ pipeline {
             }
 
             steps {
-
                 timeout(time: 60, unit: 'MINUTES') {
-
                     input message: '''
-Review the proposed formatting fix.
+The remediation agent opened a GitHub pull request.
 
-Verify:
+Review the PR and verify:
 
-• formatting only
-• no behavior changes
-• no dependency changes
-• no CI changes
+• only submission/src/text_utils.py changed
+• the change is formatting-only
+• application behavior is unchanged
+• no tests were modified
+• no dependencies were modified
+• no Jenkins or CI configuration was modified
 
-Click Proceed to continue or Abort.
+Manually merge the GitHub PR, then click Proceed.
+
+Click Abort if the proposal is unsafe.
 '''
-
                 }
-
             }
-
         }
-
     }
 
     post {
-
         always {
-
             archiveArtifacts(
                 artifacts: '''
 submission/test_selection.log,
@@ -180,9 +155,6 @@ submission/format_log.txt
 ''',
                 allowEmptyArchive: true
             )
-
         }
-
     }
-
 }
