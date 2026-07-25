@@ -1,0 +1,188 @@
+pipeline {
+    agent any
+
+    environment {
+        ANTHROPIC_API_KEY = credentials('ANTHROPIC_API_KEY')
+        MODEL = 'claude-haiku-4-5'
+    }
+
+    stages {
+
+        stage('Checkout') {
+            steps {
+                git branch: 'agent-optimized-ci',
+                    url: 'https://github.com/rodraemonalvero/CSE636-lab3.git',
+                    credentialsId: 'github-https'
+            }
+        }
+
+        stage('Select Impacted Tests') {
+            steps {
+                dir('submission') {
+
+                    script {
+
+                        sh '''
+                        python scripts/select_tests.py \
+                          --files src/text_utils.py README.md \
+                          | tee test_selection.log
+                        '''
+
+                        env.SELECTED_TESTS = sh(
+                            script: '''
+                            grep "^SELECTED_TESTS=" test_selection.log | cut -d= -f2-
+                            ''',
+                            returnStdout: true
+                        ).trim()
+
+                        echo "Selected tests: ${env.SELECTED_TESTS}"
+
+                    }
+
+                }
+            }
+        }
+
+        stage('Run Selected Tests') {
+
+            when {
+                expression {
+                    return env.SELECTED_TESTS?.trim()
+                }
+            }
+
+            steps {
+
+                dir('submission') {
+
+                    sh '''
+                    pytest ${SELECTED_TESTS} -v
+                    '''
+
+                }
+
+            }
+
+        }
+
+        stage('Skip Tests') {
+
+            when {
+                expression {
+                    return !env.SELECTED_TESTS?.trim()
+                }
+            }
+
+            steps {
+
+                echo 'Documentation-only change. Application tests skipped.'
+
+            }
+
+        }
+
+        stage('Black Formatting Check') {
+
+            steps {
+
+                dir('submission') {
+
+                    script {
+
+                        int rc = sh(
+                            script: '''
+                            black --check src > format_log.txt 2>&1
+                            ''',
+                            returnStatus: true
+                        )
+
+                        sh '''
+                        cat format_log.txt
+                        '''
+
+                        env.BLACK_FAILED = (rc != 0).toString()
+
+                        echo "Formatting failed: ${env.BLACK_FAILED}"
+
+                    }
+
+                }
+
+            }
+
+        }
+
+        stage('AI Remediation Proposal') {
+
+            when {
+                expression {
+                    return env.BLACK_FAILED == 'true'
+                }
+            }
+
+            steps {
+
+                dir('submission') {
+
+                    sh '''
+                    python scripts/remediation_agent.py \
+                      --log format_log.txt \
+                      --source src/text_utils.py
+                    '''
+
+                }
+
+            }
+
+        }
+
+        stage('Human Approval') {
+
+            when {
+                expression {
+                    return env.BLACK_FAILED == 'true'
+                }
+            }
+
+            steps {
+
+                timeout(time: 60, unit: 'MINUTES') {
+
+                    input message: '''
+Review the proposed formatting fix.
+
+Verify:
+
+• formatting only
+• no behavior changes
+• no dependency changes
+• no CI changes
+
+Click Proceed to continue or Abort.
+'''
+
+                }
+
+            }
+
+        }
+
+    }
+
+    post {
+
+        always {
+
+            archiveArtifacts(
+                artifacts: '''
+submission/test_selection.log,
+submission/format_log.txt
+''',
+                allowEmptyArchive: true
+            )
+
+        }
+
+    }
+
+}
