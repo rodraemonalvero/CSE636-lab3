@@ -48,17 +48,20 @@ Running the test suite caused the build to fail, which triggered the AI remediat
 
 ## 4. Evidence
 
-The following screenshots demonstrate the workflow:
+Evidence for this lab is included in the `screenshots/` folder inside the `submission` directory.
 
-- Local test failure before remediation.
-- Buggy calculator source code.
-- AI remediation proposal.
-- Jenkins human approval gate.
-- Successful Jenkins pipeline execution.
-- Jenkins dashboard.
-- Docker containers running.
+The following screenshots document the complete AI-assisted CI workflow:
 
-These screenshots document the complete AI-assisted CI workflow from failure detection through successful pipeline completion.
+- **01_local_failed_tests.png** – Local test execution showing the intentional failing test.
+- **02_buggy_source_and_tests.png** – The intentionally incorrect calculator implementation together with the failing test.
+- **03A_ai_agent_fix_proposal.png** – AI remediation agent output showing the detected root cause.
+- **03B_ai_agent_fix_proposal.png** – AI-generated fix description and proposed correction.
+- **03C_ai_agent_fix_proposal.png** – Completion of the AI remediation proposal.
+- **04_pipeline_success.png** – Jenkins pipeline completed successfully after approval.
+- **05_docker_jenkins_running.png** – Docker containers running Jenkins successfully.
+- **06_jenkins_dashboard.png** – Jenkins dashboard showing the completed pipeline.
+
+These screenshots provide evidence of the complete workflow from failure detection through AI analysis, human approval, and successful pipeline completion.
 
 ---
 
