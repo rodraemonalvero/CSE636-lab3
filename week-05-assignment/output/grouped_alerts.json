@@ -1,0 +1,169 @@
+[
+    {
+        "incident": "Application Errors",
+        "alert_count": 185,
+        "start_time": "2025-10-01T01:03:00",
+        "end_time": "2025-10-07T23:57:00",
+        "average_cpu_pct": 76.46,
+        "average_mem_pct": 55.22,
+        "average_req_per_sec": 320.56,
+        "average_error_rate": 5.65,
+        "sample_alerts": [
+            {
+                "timestamp": "2025-10-01T01:03:00",
+                "cpu_pct": 60.54,
+                "mem_pct": 48.39,
+                "req_per_sec": 27.1,
+                "error_rate": 5.475
+            },
+            {
+                "timestamp": "2025-10-01T01:14:00",
+                "cpu_pct": 66.38,
+                "mem_pct": 48.93,
+                "req_per_sec": 115.5,
+                "error_rate": 5.96
+            },
+            {
+                "timestamp": "2025-10-01T01:33:00",
+                "cpu_pct": 63.54,
+                "mem_pct": 45.25,
+                "req_per_sec": 200.3,
+                "error_rate": 6.889
+            },
+            {
+                "timestamp": "2025-10-01T01:38:00",
+                "cpu_pct": 51.6,
+                "mem_pct": 50.57,
+                "req_per_sec": 260.6,
+                "error_rate": 4.605
+            },
+            {
+                "timestamp": "2025-10-01T03:32:00",
+                "cpu_pct": 62.95,
+                "mem_pct": 50.4,
+                "req_per_sec": 187.7,
+                "error_rate": 3.723
+            }
+        ],
+        "related_logs": [
+            "2025-10-01T08:06:00 level=ERROR service=api-gateway event=payment_failure message=\"Payment authorization failed\"",
+            "2025-10-01T08:22:00 level=ERROR service=orders-service event=disk_full message=\"Disk utilization exceeded critical threshold\"",
+            "2025-10-01T08:22:30 level=ERROR service=postgres-db event=database_timeout message=\"Database request timed out\"",
+            "2025-10-01T08:32:00 level=ERROR service=worker-service event=disk_full message=\"Disk utilization exceeded critical threshold\"",
+            "2025-10-01T08:49:00 level=ERROR service=postgres-db event=disk_full message=\"Disk utilization exceeded critical threshold\""
+        ]
+    },
+    {
+        "incident": "General Infrastructure",
+        "alert_count": 14,
+        "start_time": "2025-10-01T23:35:00",
+        "end_time": "2025-10-07T23:56:00",
+        "average_cpu_pct": 21.2,
+        "average_mem_pct": 43.32,
+        "average_req_per_sec": 177.79,
+        "average_error_rate": 0.21,
+        "sample_alerts": [
+            {
+                "timestamp": "2025-10-01T23:35:00",
+                "cpu_pct": 17.79,
+                "mem_pct": 44.4,
+                "req_per_sec": 191.1,
+                "error_rate": 0.087
+            },
+            {
+                "timestamp": "2025-10-03T00:18:00",
+                "cpu_pct": 23.3,
+                "mem_pct": 42.62,
+                "req_per_sec": 161.0,
+                "error_rate": 0.229
+            },
+            {
+                "timestamp": "2025-10-03T00:23:00",
+                "cpu_pct": 17.02,
+                "mem_pct": 43.93,
+                "req_per_sec": 168.9,
+                "error_rate": 0.263
+            },
+            {
+                "timestamp": "2025-10-03T01:38:00",
+                "cpu_pct": 20.81,
+                "mem_pct": 43.49,
+                "req_per_sec": 166.3,
+                "error_rate": 0.274
+            },
+            {
+                "timestamp": "2025-10-03T23:24:00",
+                "cpu_pct": 21.78,
+                "mem_pct": 47.98,
+                "req_per_sec": 139.6,
+                "error_rate": 0.082
+            }
+        ],
+        "related_logs": [
+            "2025-10-01T08:01:30 level=WARNING service=inventory-service event=high_latency message=\"Request latency exceeded warning threshold\"",
+            "2025-10-01T08:06:00 level=ERROR service=api-gateway event=payment_failure message=\"Payment authorization failed\"",
+            "2025-10-01T08:07:00 level=WARNING service=orders-service event=connection_pool message=\"Database connection pool is nearly exhausted\"",
+            "2025-10-01T08:09:00 level=WARNING service=inventory-service event=memory_pressure message=\"Memory utilization is above 80 percent\"",
+            "2025-10-01T08:10:30 level=WARNING service=payments-service event=high_latency message=\"Request latency exceeded warning threshold\""
+        ]
+    },
+    {
+        "incident": "Memory Pressure",
+        "alert_count": 2,
+        "start_time": "2025-10-01T13:43:00",
+        "end_time": "2025-10-03T13:13:00",
+        "average_cpu_pct": 57.8,
+        "average_mem_pct": 66.18,
+        "average_req_per_sec": 424.05,
+        "average_error_rate": 0.36,
+        "sample_alerts": [
+            {
+                "timestamp": "2025-10-01T13:43:00",
+                "cpu_pct": 55.68,
+                "mem_pct": 66.43,
+                "req_per_sec": 439.4,
+                "error_rate": 0.388
+            },
+            {
+                "timestamp": "2025-10-03T13:13:00",
+                "cpu_pct": 59.92,
+                "mem_pct": 65.93,
+                "req_per_sec": 408.7,
+                "error_rate": 0.323
+            }
+        ],
+        "related_logs": [
+            "2025-10-01T08:07:00 level=WARNING service=orders-service event=connection_pool message=\"Database connection pool is nearly exhausted\"",
+            "2025-10-01T08:09:00 level=WARNING service=inventory-service event=memory_pressure message=\"Memory utilization is above 80 percent\"",
+            "2025-10-01T08:15:30 level=WARNING service=payments-service event=memory_pressure message=\"Memory utilization is above 80 percent\"",
+            "2025-10-01T08:16:30 level=WARNING service=auth-service event=memory_pressure message=\"Memory utilization is above 80 percent\"",
+            "2025-10-01T08:28:30 level=WARNING service=auth-service event=memory_pressure message=\"Memory utilization is above 80 percent\""
+        ]
+    },
+    {
+        "incident": "Traffic Spike",
+        "alert_count": 1,
+        "start_time": "2025-10-01T12:42:00",
+        "end_time": "2025-10-01T12:42:00",
+        "average_cpu_pct": 60.01,
+        "average_mem_pct": 63.38,
+        "average_req_per_sec": 462.8,
+        "average_error_rate": 0.28,
+        "sample_alerts": [
+            {
+                "timestamp": "2025-10-01T12:42:00",
+                "cpu_pct": 60.01,
+                "mem_pct": 63.38,
+                "req_per_sec": 462.8,
+                "error_rate": 0.282
+            }
+        ],
+        "related_logs": [
+            "2025-10-01T08:00:00 level=INFO service=postgres-db event=request_completed message=\"Request completed successfully\"",
+            "2025-10-01T08:01:30 level=WARNING service=inventory-service event=high_latency message=\"Request latency exceeded warning threshold\"",
+            "2025-10-01T08:02:00 level=INFO service=api-gateway event=request_completed message=\"Request completed successfully\"",
+            "2025-10-01T08:04:30 level=INFO service=worker-service event=request_completed message=\"Request completed successfully\"",
+            "2025-10-01T08:06:30 level=INFO service=orders-service event=request_completed message=\"Request completed successfully\""
+        ]
+    }
+]

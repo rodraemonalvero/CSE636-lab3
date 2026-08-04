@@ -1,0 +1,4 @@
+contamination,precision,recall,f1,true_positive,false_positive,false_negative,predicted_anomalies
+0.01,1.0,0.5459,0.7063,101,0,84,101
+0.02,0.9158,1.0,0.9561,185,17,0,202
+0.1,0.1835,1.0,0.3101,185,823,0,1008

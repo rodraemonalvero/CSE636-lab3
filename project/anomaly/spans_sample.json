@@ -1,0 +1,175 @@
+{
+    "name": "log_analysis",
+    "context": {
+        "trace_id": "0x3ab3b3ef1fee0fba589f73ac7932b1f1",
+        "span_id": "0x6e9ac2a4b2414a11",
+        "trace_state": "[]"
+    },
+    "kind": "SpanKind.INTERNAL",
+    "parent_id": null,
+    "start_time": "2026-08-03T23:48:24.720282Z",
+    "end_time": "2026-08-03T23:48:24.720384Z",
+    "status": {
+        "status_code": "UNSET"
+    },
+    "attributes": {
+        "gen_ai.system": "anthropic",
+        "gen_ai.request.model": "claude-sonnet-simulated",
+        "gen_ai.usage.input_tokens": 12,
+        "gen_ai.usage.output_tokens": 10,
+        "latency_ms": 200.45,
+        "estimated_cost": 0.000186
+    },
+    "events": [],
+    "links": [],
+    "resource": {
+        "attributes": {
+            "telemetry.sdk.language": "python",
+            "telemetry.sdk.name": "opentelemetry",
+            "telemetry.sdk.version": "1.44.0",
+            "service.instance.id": "ea921a20-2548-4107-86f1-aa976e449ff8",
+            "service.name": "unknown_service"
+        },
+        "schema_url": ""
+    }
+}
+{
+    "name": "log_analysis",
+    "context": {
+        "trace_id": "0x172cff98ecf5edc2a6c674867e1f530e",
+        "span_id": "0x6d8a849da4d73133",
+        "trace_state": "[]"
+    },
+    "kind": "SpanKind.INTERNAL",
+    "parent_id": null,
+    "start_time": "2026-08-03T23:48:24.922101Z",
+    "end_time": "2026-08-03T23:48:24.922164Z",
+    "status": {
+        "status_code": "UNSET"
+    },
+    "attributes": {
+        "gen_ai.system": "anthropic",
+        "gen_ai.request.model": "claude-sonnet-simulated",
+        "gen_ai.usage.input_tokens": 14,
+        "gen_ai.usage.output_tokens": 10,
+        "latency_ms": 200.56,
+        "estimated_cost": 0.000192
+    },
+    "events": [],
+    "links": [],
+    "resource": {
+        "attributes": {
+            "telemetry.sdk.language": "python",
+            "telemetry.sdk.name": "opentelemetry",
+            "telemetry.sdk.version": "1.44.0",
+            "service.instance.id": "ea921a20-2548-4107-86f1-aa976e449ff8",
+            "service.name": "unknown_service"
+        },
+        "schema_url": ""
+    }
+}
+{
+    "name": "log_analysis",
+    "context": {
+        "trace_id": "0x9eac51429218596b3b3316452091d566",
+        "span_id": "0x991da30a5b0a3fd9",
+        "trace_state": "[]"
+    },
+    "kind": "SpanKind.INTERNAL",
+    "parent_id": null,
+    "start_time": "2026-08-03T23:48:25.123387Z",
+    "end_time": "2026-08-03T23:48:25.123451Z",
+    "status": {
+        "status_code": "UNSET"
+    },
+    "attributes": {
+        "gen_ai.system": "anthropic",
+        "gen_ai.request.model": "claude-sonnet-simulated",
+        "gen_ai.usage.input_tokens": 15,
+        "gen_ai.usage.output_tokens": 12,
+        "latency_ms": 200.49,
+        "estimated_cost": 0.000225
+    },
+    "events": [],
+    "links": [],
+    "resource": {
+        "attributes": {
+            "telemetry.sdk.language": "python",
+            "telemetry.sdk.name": "opentelemetry",
+            "telemetry.sdk.version": "1.44.0",
+            "service.instance.id": "ea921a20-2548-4107-86f1-aa976e449ff8",
+            "service.name": "unknown_service"
+        },
+        "schema_url": ""
+    }
+}
+{
+    "name": "log_analysis",
+    "context": {
+        "trace_id": "0x08cea972910344ee956ff914f805c7e0",
+        "span_id": "0x1c95f64515f80b5d",
+        "trace_state": "[]"
+    },
+    "kind": "SpanKind.INTERNAL",
+    "parent_id": null,
+    "start_time": "2026-08-03T23:48:25.324370Z",
+    "end_time": "2026-08-03T23:48:25.324410Z",
+    "status": {
+        "status_code": "UNSET"
+    },
+    "attributes": {
+        "gen_ai.system": "anthropic",
+        "gen_ai.request.model": "claude-sonnet-simulated",
+        "gen_ai.usage.input_tokens": 9,
+        "gen_ai.usage.output_tokens": 10,
+        "latency_ms": 200.21,
+        "estimated_cost": 0.000177
+    },
+    "events": [],
+    "links": [],
+    "resource": {
+        "attributes": {
+            "telemetry.sdk.language": "python",
+            "telemetry.sdk.name": "opentelemetry",
+            "telemetry.sdk.version": "1.44.0",
+            "service.instance.id": "ea921a20-2548-4107-86f1-aa976e449ff8",
+            "service.name": "unknown_service"
+        },
+        "schema_url": ""
+    }
+}
+{
+    "name": "log_analysis",
+    "context": {
+        "trace_id": "0x5cf9171fe6c79dc3571b6201c51b54a1",
+        "span_id": "0x64443bd7df9cb58e",
+        "trace_state": "[]"
+    },
+    "kind": "SpanKind.INTERNAL",
+    "parent_id": null,
+    "start_time": "2026-08-03T23:48:25.525458Z",
+    "end_time": "2026-08-03T23:48:25.525538Z",
+    "status": {
+        "status_code": "UNSET"
+    },
+    "attributes": {
+        "gen_ai.system": "anthropic",
+        "gen_ai.request.model": "claude-sonnet-simulated",
+        "gen_ai.usage.input_tokens": 18,
+        "gen_ai.usage.output_tokens": 12,
+        "latency_ms": 200.42,
+        "estimated_cost": 0.000234
+    },
+    "events": [],
+    "links": [],
+    "resource": {
+        "attributes": {
+            "telemetry.sdk.language": "python",
+            "telemetry.sdk.name": "opentelemetry",
+            "telemetry.sdk.version": "1.44.0",
+            "service.instance.id": "ea921a20-2548-4107-86f1-aa976e449ff8",
+            "service.name": "unknown_service"
+        },
+        "schema_url": ""
+    }
+}
