@@ -44,3 +44,6 @@ weeks/week-01/lab-env/certs/*.crt
 
 # Week 3 ci-agent-demo generated run reports (keep the dir via .gitkeep)
 project/ci-agent-demo/reports/run-*.md
+
+# Week 6 Python virtual environment
+weeks/week-06/week6-lab/

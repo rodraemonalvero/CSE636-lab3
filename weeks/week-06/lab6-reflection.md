@@ -1,0 +1,11 @@
+# Week 6 Lab Reflection
+
+**Student:** Rod Raemon Alvero
+
+The incident-triage agent operated at a supervised level of autonomy. It was allowed to independently investigate the simulated incident by checking metrics, reviewing recent logs, examining deployment history, and performing a dry-run rollback. However, it could not execute the actual rollback without human approval. I think this was the right level of autonomy because diagnostic actions are relatively low risk, while a rollback can affect a production service and should require human confirmation. This approach still allows the agent to reduce the workload of the on-call engineer without giving it unrestricted control.
+
+Several guardrails were present beyond the human approval gate. The agent was instructed to perform a dry-run before executing a rollback, which allowed it to check the target version and whether a migration was pending. It also examined the remaining error budget and compared information from multiple sources instead of reacting only to the initial alert. Another guardrail was the escalation path. During my second test, I entered "no" at the approval gate. The rollback was blocked and the agent escalated the incident to the human on-call instead of attempting to bypass the decision.
+
+Before connecting an agent like this to a real Kubernetes cluster, I would add stronger authentication, Kubernetes RBAC with least-privilege permissions, audit logging, rate limits, namespaces, and restrictions on which deployments the agent can modify. I would also require health checks after remediation and an emergency kill switch. The agent should first be tested in a development or staging cluster using simulated failures before receiving any production permissions.
+
+What surprised me most was how the agent combined the available evidence. It connected the 8% payment-service error rate, repeated NullPointerException messages, and the recent v1.4.2 deployment to identify a likely root cause. It also recognized that the cart-service latency was probably a downstream effect rather than a separate incident. The approval tests were especially useful because they demonstrated that an agent can perform detailed investigation autonomously while still leaving the final destructive decision under human control.

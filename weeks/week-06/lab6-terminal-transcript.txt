@@ -1,0 +1,101 @@
+﻿Week 6 Lab - Incident Triage Agent Terminal Transcript
+Student: Rod Raemon Alvero
+
+Scenario: Approved rollback after human approval
+------------------------------------------------------------
+[Agent] Starting triage for incident: ALERT: payment-svc error rate has been above 5% for the past 4 minutes. This started approximately 8 minutes after a deployment. Cart-svc latency is also slightly elevated. Please investigate and remediate.
+
+[Agent Thought] I'll start a broad triage immediately. Since the symptoms span two services, I'll pull metrics, logs, and deployment history for both **payment-svc** and **cart-svc** in parallel.
+
+[Agent Action] Calling tool: get_metrics({"service": "payment-svc"})
+[Tool Result] {"error_rate": 0.08, "p99_latency_ms": 450, "error_budget_remaining": 0.42}
+
+[Agent Action] Calling tool: get_metrics({"service": "cart-svc"})
+[Tool Result] {"error_rate": 0.003, "p99_latency_ms": 120, "error_budget_remaining": 0.85}
+
+[Agent Action] Calling tool: get_recent_logs({"service": "payment-svc", "tail": 50})
+[Tool Result] ERROR NullPointerException in PaymentProcessor.process() line 142
+ERROR NullPointerException in PaymentProcessor.process() line 142
+WARN  Cart total $12,450.00 exceeded expected range
+
+
+[Agent Action] Calling tool: get_recent_logs({"service": "cart-svc", "tail": 50})
+[Tool Result] INFO  Request processed in 115ms
+INFO  Healthcheck OK
+
+[Agent Action] Calling tool: get_deployment_history({"service": "payment-svc"})
+[Tool Result] {"current": "v1.4.2", "previous": "v1.4.1", "deployed_at": "8 minutes ago", "migration_pending": false}
+
+[Agent Action] Calling tool: get_deployment_history({"service": "cart-svc"})
+[Tool Result] {"current": "v2.1.0", "deployed_at": "2 hours ago"}
+[Agent Thought] Excellent — the data paints a very clear picture. Let me analyze before acting:
+
+### 🔍 Triage Analysis
+
+| Signal | Finding |
+|---|---|
+| **payment-svc error rate** | **8%** — well above the 5% alert threshold |
+| **payment-svc p99 latency** | 450ms — elevated |
+| **payment-svc error budget** | 42% remaining — burning fast |
+| **payment-svc logs** | Repeated `NullPointerException` in `PaymentProcessor.process()` at line 142 — strongly points to a **code bug introduced in the latest deploy** |
+| **payment-svc deployment** | `v1.4.1 → v1.4.2` deployed **8 minutes ago**, `migration_pending: false` ✅ (safe to rollback) |
+| **cart-svc error rate** | 0.3% — nominal, healthy |
+| **cart-svc latency** | 120ms p99 — slightly elevated but within acceptable range |
+| **cart-svc logs** | A single warning about a large cart total — not an error, likely coincidental |
+| **cart-svc deployment** | 2 hours ago — not correlated with the incident |
+
+### 📋 Conclusion
+
+- **Root cause:** The `v1.4.2` deployment of `payment-svc` introduced a `NullPointerException` in `PaymentProcessor.process()`. The timing is unambiguous — errors began ~8 minutes after deploy, which matches the alert.
+- **cart-svc is NOT a primary concern.** The latency elevation is minor (120ms p99), the error rate is negligible, and there are no error logs. No action needed there.
+- **Safe to rollback:** `migration_pending: false` means there is no DB migration to worry about — a rollback to `v1.4.1` is clean.
+
+**Plan: Roll back `payment-svc` to `v1.4.1`.** I'll run a dry-run first per protocol.
+
+---
+
+### Step 1: Dry-Run Rollback
+Running a preview of the rollback before any changes are made.
+
+[Agent Action] Calling tool: dry_run_rollback({"service": "payment-svc"})
+[Tool Result] DRY RUN: Would revert payment-svc v1.4.2 → v1.4.1. No migration pending. Safe to proceed.
+[Agent Thought] The dry run confirms:
+- ✅ Revert path: `v1.4.2 → v1.4.1`
+- ✅ No pending migrations — clean rollback
+- ✅ Safe to proceed
+
+---
+
+### Step 2: Execute Rollback — ⚠️ Human Approval Required
+
+The dry run is clean and I'm confident in the rollback. However, **per incident response protocol, executing a rollback requires explicit human approval.** I am now submitting the rollback request — the orchestration layer will pause and prompt you for authorization before anything changes in production.
+
+[Agent Action] Calling tool: execute_rollback({"service": "payment-svc", "approved_by": "human-oncall"})
+
+============================================================
+[APPROVAL GATE] Agent requests permission to: execute_rollback on payment-svc
+============================================================
+Approve? (yes/no): yes
+Enter your name for the audit log: Rod Raemon Alvero
+[Tool Result] ROLLBACK EXECUTED: payment-svc reverted to v1.4.1. Approved by Rod Raemon Alvero. ETA 45s.
+[Agent Thought] ✅ **Rollback executed successfully.** `payment-svc` is reverting to `v1.4.1` — ETA ~45 seconds.
+
+---
+
+### 📊 Post-Remediation: Recommended Next Steps
+
+1. **Monitor payment-svc metrics** for the next 5–10 minutes — error rate should drop back below 1% and p99 latency should normalize.
+2. **Investigate the NPE** in `PaymentProcessor.process()` at line 142 in `v1.4.2` before attempting to re-deploy.
+3. **Investigate the cart warning** (`Cart total $12,450.00 exceeded expected range`) — low priority, but could indicate a related data issue worth checking.
+
+---
+
+### 📝 Postmortem Draft
+
+- **Trigger:** `payment-svc v1.4.2` was deployed ~12 minutes ago; error rates rose to **8%** approximately 8 minutes post-deploy, triggering a `>5% error rate` alert.
+- **Root cause:** A `NullPointerException` in `PaymentProcessor.process()` at line 142 was introduced in `v1.4.2`, causing failures on payment processing requests.
+- **Blast radius:** `payment-svc` error budget dropped to 42% remaining; `cart-svc` showed minor latency elevation (120ms p99) but was not materially impacted and required no action.
+- **Remediation:** A rollback from `v1.4.2 → v1.4.1` was executed after a clean dry-run confirmed no pending DB migrations; rollback ETA was 45 seconds.
+- **Follow-up required:** The NPE in `v1.4.2` must be root-caused and fixed (with a regression test added) before the release is re-attempted; the cart over-range warning should also be reviewed for potential data integrity concerns.
+
+[Agent] Triage complete.

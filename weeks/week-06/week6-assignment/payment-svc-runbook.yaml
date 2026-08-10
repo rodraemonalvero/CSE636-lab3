@@ -1,0 +1,101 @@
+# Student: Rod Raemon Alvero
+# Week 6 Assignment
+# Self-Healing Runbook for payment-svc
+
+runbook:
+  name: payment-svc-high-error-rate
+  service: payment-svc
+
+  trigger:
+    metric: error_rate
+    threshold: "> 0.05"
+    duration: "4 minutes"
+    description: >
+      Trigger the incident workflow when payment-svc error rate
+      remains above 5% for at least 4 minutes.
+
+  diagnostics:
+    - step: 1
+      tool: get_metrics
+      input:
+        service: payment-svc
+      purpose: >
+        Confirm the current error rate, latency, and remaining
+        error budget.
+
+    - step: 2
+      tool: get_recent_logs
+      input:
+        service: payment-svc
+        tail: 20
+      purpose: >
+        Check recent application logs for repeated errors or
+        patterns related to the incident.
+
+    - step: 3
+      tool: get_deployment_history
+      input:
+        service: payment-svc
+      purpose: >
+        Determine whether the incident began shortly after a
+        deployment and check whether a migration is pending.
+
+    - step: 4
+      tool: dry_run_rollback
+      input:
+        service: payment-svc
+      purpose: >
+        Preview the rollback and verify that the previous version
+        is available before any destructive action is attempted.
+
+  decision_logic:
+    auto_continue_to_approval:
+      conditions:
+        - "error_rate > 0.05"
+        - "recent logs show repeated application errors"
+        - "recent deployment correlates with incident start"
+        - "migration_pending == false"
+        - "dry-run rollback succeeds"
+      action: >
+        Propose rollback and request human approval.
+
+    escalate:
+      conditions:
+        - "migration_pending == true"
+        - "diagnostic evidence is incomplete or contradictory"
+        - "dry-run rollback fails"
+        - "error budget is critically low"
+        - "human approval is declined"
+      action: >
+        Stop automated remediation and escalate to the human
+        on-call engineer.
+
+  remediation:
+    tool: execute_rollback
+    target: payment-svc
+    requires_human_approval: true
+    description: >
+      Roll back payment-svc from the current version to the
+      previous known-good version only after explicit human
+      approval.
+
+  verification:
+    steps:
+      - tool: get_metrics
+        input:
+          service: payment-svc
+        expected_result: >
+          Error rate falls below 5% and latency begins returning
+          toward the normal range.
+
+      - tool: get_recent_logs
+        input:
+          service: payment-svc
+          tail: 20
+        expected_result: >
+          Repeated NullPointerException errors stop appearing.
+
+      - action: >
+          If service health does not improve after remediation,
+          stop automated actions and escalate to the human on-call
+          engineer.
